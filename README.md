@@ -1,8 +1,16 @@
+# ABAP Programming #
+ABAP (Advanced Business Application Programming), is a fourth-generation programming language, used for development and customization purposes in the SAP software. <br />
+Currently positioned along with Java, as the main language for SAP application server programming, most of the programs are executed under the control of the run-time system. 
+
 ## Project Development Using SAP ABAP ##
 
 Objective of this project is to develop an application for faculty and students using ABAP 'Advance Business Application Programming'. <br />
 In this project, faculty can read or write the details of students or faculty while the students only fill their details and read their respective details only. All this done by login to an account or by creating new account.
 
+### Prerequisites ###
+  * Basic Understanding of JAVA Programming and
+  * Database Technologies like PL/SQL
+  
 ### Benefits of SAP ABAP ###
   * Direct Access to specialist and niche skills as needed by the customer.
   * Ability to respond faster to the changes in demand.
