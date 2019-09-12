@@ -1,0 +1,374 @@
+*&---------------------------------------------------------------------*
+*& Include ZCSE_MAIN_TOP                                     Module Pool      ZCSE1
+*&
+*&---------------------------------------------------------------------*
+
+PROGRAM  ZCSE1.
+DATA : DATE TYPE D.
+*DATA FOR LOGIN AND NEW ACCOUNT.
+DATA: USER LIKE ZLOGIN-USERNAME,
+      PASS LIKE ZLOGIN-PASSWORD,
+      RE1 LIKE ZLOGIN-PASSWORD,
+      TYPE LIKE ZLOGIN-TYPE.
+DATA : WA_LOG LIKE ZLOGIN,
+       WA_LOGIN LIKE ZLOGIN.
+*TABLE CONTROL FOR  FACULTY INFO
+CONTROLS : TABLC TYPE TABLEVIEW USING SCREEN 144.
+TYPES: BEGIN OF TY_FAC,
+        FACULTY_ID TYPE ZFACULTY-FACULTY_ID,
+        NAME TYPE ZFACULTY-NAME,
+        DESIGNATION TYPE ZFACULTY-DESIGNATION,
+        MOBILENO TYPE ZFACULTY-MOBILENO,
+        EMAILID TYPE ZFACULTY-EMAILID,
+        ADDRESS TYPE ZFACULTY-ADDRESS,
+        CITY TYPE ZFACULTY-CITY,
+        STATE TYPE ZFACULTY-STATE,
+        PINCODE TYPE ZFACULTY-PINCODE,
+        CDATE TYPE ZFACULTY-CDATE,
+       END OF TY_FAC.
+DATA : IT_FAC TYPE STANDARD TABLE OF TY_FAC,
+       WA_F TYPE TY_FAC.
+*----------------------------------------------------------------------*
+*TABLE CONTROL FOR STUDENT INFO
+CONTROLS : TABLC1 TYPE TABLEVIEW USING SCREEN 145.
+TYPES: BEGIN OF TY_STU,
+        STUDENTID TYPE ZSTU-STUDENTID,
+        NAME TYPE ZSTU-NAME,
+        ROLLNO TYPE ZSTU-ROLLNO,
+        BRANCH TYPE ZSTU-BRANCH,
+        MOBILENO TYPE ZSTU-MOBILENO,
+        PARENTSNO TYPE ZSTU-PARENTSNO,
+        EMAILID TYPE ZSTU-EMAILID,
+        ADDRESS TYPE ZSTU-ADDRESS,
+        CITY TYPE ZSTU-CITY,
+        STATE TYPE ZSTU-STATE,
+        PINCODE TYPE ZSTU-PINCODE,
+        CDATE TYPE ZSTU-CDATE,
+       END OF TY_STU.
+DATA : IT_STU TYPE STANDARD TABLE OF TY_STU,
+       WA_S TYPE TY_STU.
+*----------------------------------------------------------------------*
+*FOR FACULTY.
+DATA : ID LIKE ZFACULTY-FACULTY_ID,
+       NAME LIKE ZFACULTY-NAME,
+       DESIG LIKE ZFACULTY-DESIGNATION,
+       MOBNO LIKE ZFACULTY-MOBILENO,
+       MAIL LIKE ZFACULTY-EMAILID,
+       ADDR LIKE ZFACULTY-ADDRESS,
+       CITY LIKE ZFACULTY-CITY,
+       STATE LIKE ZFACULTY-STATE,
+       PIN LIKE ZFACULTY-PINCODE.
+DATA : WA_FAC LIKE ZFACULTY,
+       WA_FC LIKE ZFACULTY.
+*----------------------------------------------------------------------*
+*FOR STUDENT.
+DATA : SID LIKE ZSTU-STUDENTID,
+       SNAME LIKE ZSTU-NAME,
+       RNO LIKE ZSTU-ROLLNO,
+       BRANCH LIKE ZSTU-BRANCH,
+       MOB1 LIKE ZSTU-MOBILENO,
+       PNO LIKE ZSTU-PARENTSNO,
+       MAILID LIKE ZSTU-EMAILID,
+       ADR LIKE ZSTU-ADDRESS,
+       SCITY LIKE ZSTU-CITY,
+       SSTATE LIKE ZSTU-STATE,
+       PIN1 LIKE ZSTU-PINCODE.
+DATA : WA_STU LIKE ZSTU,
+       WA_ST LIKE ZSTU.
+*&---------------------------------------------------------------------*
+*&      Module  MODIFY_SCREEN  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE MODIFY_SCREEN OUTPUT.
+  LOOP AT SCREEN.
+    IF SCREEN-GROUP1 = 'GRP'.
+      SCREEN-INVISIBLE = '1'.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+ENDMODULE.                 " MODIFY_SCREEN  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0140  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0140 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'EXT'.
+      LEAVE PROGRAM.
+    WHEN 'LOG'.
+      SELECT *
+        FROM ZLOGIN
+        INTO WA_LOG.
+      ENDSELECT.
+      IF USER = WA_LOG-USERNAME  AND PASS = WA_LOG-PASSWORD.
+        IF WA_LOG-TYPE = 'FACULTY'.
+          CALL SCREEN 142.
+        ELSEIF WA_LOG-TYPE = 'STUDENT'.
+          CALL SCREEN 145.
+        ENDIF.
+      ENDIF.
+    WHEN 'ACC'.
+      CALL SCREEN 141.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0140  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0141  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0141 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'EXT'.
+      LEAVE PROGRAM.
+    WHEN 'BAC'.
+      CALL SCREEN 140.
+    WHEN 'CHC'.
+      SELECT *
+        FROM ZLOGIN
+        INTO WA_LOG.
+      ENDSELECT.
+      IF WA_LOG-USERNAME = USER.
+        MESSAGE 'CHOOSE ANOTHER USERNAME !!' TYPE 'I'.
+        MESSAGE 'USERNAME ALREADY EXITS !!' TYPE 'S'.
+      ELSE.
+        MESSAGE 'USERNAME AVAILABLE !!' TYPE 'S'.
+      ENDIF.
+    WHEN 'ACC1'.
+      SELECT *
+        FROM ZLOGIN
+        INTO WA_LOG.
+      ENDSELECT.
+       DATE = SY-DATUM.
+       IF USER = WA_LOG-USERNAME.
+         MESSAGE 'CHOOSE ANOTHER USERNAME !!' TYPE 'I'.
+         MESSAGE 'USERNAME ALREADY EXITS !!' TYPE 'S'.
+       ELSE.
+         WA_LOGIN-USERNAME = USER.
+       ENDIF.
+       IF PASS = RE1.
+         WA_LOGIN-PASSWORD = PASS.
+       ELSE.
+         MESSAGE 'PASSWORD DOESNOT MATCH !!' TYPE 'I'.
+       ENDIF.
+       WA_LOGIN-TYPE = TYPE.
+       WA_LOGIN-CDATE = DATE.
+       INSERT ZLOGIN FROM WA_LOGIN.
+       IF TYPE = 'FACULTY'.
+         CALL SCREEN 143.
+       ELSEIF TYPE = 'STUDENT'.
+         CALL SCREEN 147.
+       ENDIF.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0141  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0142  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0142 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'LOGOUT'.
+      CALL SCREEN 140.
+    WHEN 'FC'.
+      CALL SCREEN 144.
+    WHEN 'ST'.
+      CALL SCREEN 145.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0142  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0143  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0143 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'LG'.
+      CALL SCREEN 140.
+    WHEN 'EXT'.
+      LEAVE  PROGRAM.
+    WHEN 'FAC'.
+      CALL SCREEN 146.
+    WHEN 'STU'.
+      CALL SCREEN 147.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0143  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  GET_DATA  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE GET_DATA OUTPUT.
+  SELECT *
+    FROM ZFACULTY
+  INTO TABLE IT_FAC.
+ENDMODULE.                 " GET_DATA  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  CURR_LINE  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE CURR_LINE OUTPUT.
+  TABLC-CURRENT_LINE = SY-LOOPC.
+  TABLC-LINES = SY-DBCNT.
+ENDMODULE.                 " CURR_LINE  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  MODIFY  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE MODIFY INPUT.
+  MODIFY IT_FAC FROM WA_F
+  INDEX TABLC-CURRENT_LINE.
+ENDMODULE.                 " MODIFY  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0144  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0144 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'BAC'.
+      CALL SCREEN 142.
+    WHEN 'EXT'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0144  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  MODIFY1  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE MODIFY1 INPUT.
+  MODIFY IT_STU FROM WA_S
+  INDEX TABLC1-CURRENT_LINE.
+ENDMODULE.                 " MODIFY1  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0145  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0145 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'BACK'.
+      CALL SCREEN 140.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0145  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0146  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0146 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN 'BACK'.
+      CALL SCREEN 140.
+    WHEN 'CH'.
+      SELECT *
+        FROM ZFACULTY
+      INTO WA_FC.
+      ENDSELECT.
+      IF WA_FC-FACULTY_ID = ID.
+        MESSAGE 'CHOOSE ANOTHER ID !!' TYPE 'I'.
+        MESSAGE 'ID IS ALREADY IN USE !!' TYPE 'S'.
+      ELSE.
+        MESSAGE 'ID IS AVAILABLE !!' TYPE 'I'.
+      ENDIF.
+    WHEN 'SUB'.
+      DATE = SY-DATUM.
+      SELECT *
+        FROM ZFACULTY
+      INTO WA_FC.
+      ENDSELECT.
+      IF ID = WA_FC-FACULTY_ID.
+        MESSAGE 'CHOOSE ANOTHER ID !!' TYPE 'I'.
+        MESSAGE 'ID IS ALREADY IN USE !!' TYPE 'S'.
+      ELSE.
+        WA_FAC-FACULTY_ID = ID.
+      ENDIF.
+      WA_FAC-NAME = NAME.
+      WA_FAC-MOBILENO = MOBNO.
+      WA_FAC-DESIGNATION = DESIG.
+      WA_FAC-EMAILID = MAIL.
+      WA_FAC-ADDRESS = ADDR.
+      WA_FAC-CITY = CITY.
+      WA_FAC-STATE = STATE.
+      WA_FAC-PINCODE = PIN.
+      WA_FAC-CDATE = DATE.
+      INSERT ZFACULTY FROM WA_FAC.
+      MESSAGE 'DETAILS SUBMIT SUCCESSFULLY !!' TYPE 'I'.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0146  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0147  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0147 INPUT.
+  CASE SY-UCOMM.
+    WHEN 'EXT'.
+      LEAVE PROGRAM.
+    WHEN 'BACK'.
+      CALL SCREEN 140.
+    WHEN 'CHC'.
+      SELECT *
+        FROM ZSTU
+      INTO WA_ST.
+      ENDSELECT.
+      IF WA_ST-STUDENTID = SID.
+        MESSAGE 'CHOOSE ANOTHER ID !!' TYPE 'I'.
+        MESSAGE 'ID IS ALREADY IN USE !!' TYPE 'S'.
+      ELSE.
+        MESSAGE 'ID IS AVAILABLE !!' TYPE 'I'.
+      ENDIF.
+    WHEN 'SUB1'.
+      DATE = SY-DATUM.
+      SELECT *
+        FROM ZSTU
+      INTO WA_ST.
+      ENDSELECT.
+      IF WA_ST-STUDENTID = SID.
+        MESSAGE 'CHOOSE ANOTHER ID !!' TYPE 'I'.
+        MESSAGE 'ID IS ALREADY IN USE !!' TYPE 'S'.
+      ELSE.
+        WA_STU-STUDENTID = SID.
+      ENDIF.
+      WA_STU-NAME = SNAME.
+      WA_STU-ROLLNO = RNO.
+      WA_STU-BRANCH = BRANCH.
+      WA_STU-MOBILENO = MOB1.
+      WA_STU-PARENTSNO = PNO.
+      WA_STU-EMAILID = MAILID.
+      WA_STU-ADDRESS = ADR.
+      WA_STU-CITY = SCITY.
+      WA_STU-STATE = SSTATE.
+      WA_STU-PINCODE = PIN1.
+      WA_STU-CDATE = DATE.
+      INSERT ZSTU FROM WA_STU.
+      MESSAGE 'DETAILS SUBMIT SUCCESSFULLY !!' TYPE 'I'.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0147  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  GET_DATA1  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE GET_DATA1 OUTPUT.
+  SELECT *
+    FROM ZSTU
+  INTO TABLE IT_STU.
+ENDMODULE.                 " GET_DATA1  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  CURR_LINE1  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE CURR_LINE1 OUTPUT.
+  TABLC1-CURRENT_LINE = SY-LOOPC.
+  TABLC1-LINES = SY-DBCNT.
+ENDMODULE.                 " CURR_LINE1  OUTPUT
